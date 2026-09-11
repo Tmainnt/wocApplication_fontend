@@ -5,6 +5,7 @@ import 'package:woc/view/profile/profile_page.dart';
 import 'package:woc/theme/widget_color.dart';
 import 'package:woc/widget/community/report_user_dialog.dart';
 import 'package:woc/provider/user_provider.dart';
+import 'package:woc/service/backend_service.dart';
 
 class FollowListPage extends StatefulWidget {
   final String profileOwnerUID;
@@ -26,10 +27,24 @@ class FollowListPage extends StatefulWidget {
 
 class _FollowListPageState extends State<FollowListPage> {
   final widgetColors = WidgetColor();
+  final BackendService _backendService = BackendService();
+  late Future<List<String>> _followListFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFollowList();
+  }
+
+  void _loadFollowList() {
+    // Assuming backend returns list of UIDs
+    _followListFuture = widget.isFollowersMode
+        ? _backendService.getFollowers(widget.profileOwnerUID)
+        : _backendService.getFollowing(widget.profileOwnerUID);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<UserProvider>(context, ).queryUser;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -53,17 +68,13 @@ class _FollowListPageState extends State<FollowListPage> {
           ),
         ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(widget.profileOwnerUID)
-            .collection(widget.isFollowersMode ? 'follower' : 'following')
-            .snapshots(),
+      body: FutureBuilder<List<String>>(
+        future: _followListFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
               child: Text(
                 widget.isFollowersMode
@@ -73,17 +84,21 @@ class _FollowListPageState extends State<FollowListPage> {
             );
           }
 
+          final followList = snapshot.data!;
           return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
+            itemCount: followList.length,
             itemBuilder: (context, index) {
-              String targetUID = snapshot.data!.docs[index].id;
+              String targetUID = followList[index];
 
-              return FutureBuilder<UserModel>(
-                future: _firestoreService.getUserDataByUID(targetUID),
+              return FutureBuilder<dynamic>(
+                future: _backendService.getUserDataByUID(targetUID),
                 builder: (context, userSnapshot) {
                   if (!userSnapshot.hasData) return const SizedBox.shrink();
 
-                  final user = userSnapshot.data!;
+                  // Using dynamic map for user data as model might need update
+                  final userMap = userSnapshot.data!;
+                  final userName = userMap['user_name'] ?? 'Unknown';
+                  final profileUrl = userMap['user_profile_image'] ?? '';
 
                   return GestureDetector(
                     onTap: () {
@@ -91,13 +106,13 @@ class _FollowListPageState extends State<FollowListPage> {
                     },
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundImage: user.phoUrl.isNotEmpty
-                            ? NetworkImage(user.phoUrl)
+                        backgroundImage: profileUrl.isNotEmpty
+                            ? NetworkImage(profileUrl)
                             : const AssetImage('assets/default_profile.png')
                                   as ImageProvider,
                       ),
                       title: Text(
-                        user.name,
+                        userName,
                         style: const TextStyle(fontWeight: FontWeight.w500),
                       ),
                       trailing: Row(
@@ -105,11 +120,6 @@ class _FollowListPageState extends State<FollowListPage> {
                         children: [
                           if (targetUID != widget.currentUID)
                             _buildFollowButton(targetUID),
-
-                          IconButton(
-                            icon: const Icon(Icons.more_horiz),
-                            onPressed: () => _showMoreOptions(context, user),
-                          ),
                         ],
                       ),
                     ),
@@ -124,17 +134,20 @@ class _FollowListPageState extends State<FollowListPage> {
   }
 
   Widget _buildFollowButton(String targetUID) {
-    return StreamBuilder<bool>(
-      stream: _firestoreService.hasUserFollowed(targetUID, widget.currentUID),
+    return FutureBuilder<bool>(
+      future: _backendService.hasUserFollowed(targetUID, widget.currentUID),
       builder: (context, snapshot) {
         final isFollowing = snapshot.data ?? false;
         return TextButton(
-          onPressed: () {
+          onPressed: () async {
             if (isFollowing) {
-              _firestoreService.unfollowUser(widget.currentUID, targetUID);
+              await _backendService.unfollowUser(targetUID, widget.currentUID);
             } else {
-              _firestoreService.followUser(widget.currentUID, targetUID);
+              await _backendService.followUser(targetUID, widget.currentUID);
             }
+            setState(() {
+              _loadFollowList(); // Refresh list/button state
+            });
           },
           child: Text(
             isFollowing ? "เลิกติดตาม" : "ติดตาม",
@@ -148,7 +161,7 @@ class _FollowListPageState extends State<FollowListPage> {
     );
   }
 
-  void _showMoreOptions(BuildContext context, UserModel user) {
+  void _showMoreOptions(BuildContext context, User user) {
     showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
@@ -163,7 +176,7 @@ class _FollowListPageState extends State<FollowListPage> {
                 showDialog(
                   context: context,
                   builder: (_) => ReportUserDialog(
-                    reportedUID: user.UID,
+                    reportedUID: user.uid,
                     reportedName: user.name,
                     postId: '',
                     label: 'report_user',
