@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:woc/theme/widget_color.dart';
+import 'package:woc/service/backend_service.dart';
 
 class ReportUserDialog extends StatefulWidget {
   final String reportedUID;
   final String reportedName;
-  final String? reporterUID;
-  final String? reporterName;
   final String? postId;
   final String? commentId;
   final String? commentText;
@@ -16,8 +15,6 @@ class ReportUserDialog extends StatefulWidget {
     required this.reportedUID,
     required this.reportedName,
     required this.label,
-    this.reporterUID,
-    this.reporterName,
     this.postId,
     this.commentId,
     this.commentText,
@@ -30,6 +27,7 @@ class ReportUserDialog extends StatefulWidget {
 class _ReportUserDialogState extends State<ReportUserDialog> {
   final TextEditingController _detailController = TextEditingController();
   final widgetColors = WidgetColor();
+  final BackendService _backendService = BackendService();
 
   String? _selectedReason;
   bool _isSubmitting = false;
@@ -99,28 +97,12 @@ class _ReportUserDialogState extends State<ReportUserDialog> {
 
     try {
       if (widget.label == 'ban_user') {
-        final currentAdminUID = FirebaseAuth.instance.currentUser?.uid;
-        await firestoreService.banUser(
-          targetUid: widget.reportedUID,
-          reportId: null,
-          reporterId: widget.reporterUID,
-          reporterName: widget.reporterName,
-          reason: _selectedReason!,
-          detail: _detailController.text.trim(),
-          adminUid: currentAdminUID ?? '',
-        );
+        await _backendService.banUser(widget.reportedUID);
       } else if (widget.label == 'report_comment' ||
           widget.label == 'report_user') {
-        await firestoreService.reportUserAndComment(
-          reportedUid: widget.reportedUID,
-          reportedName: widget.reportedName,
-          reporterUid: widget.reporterUID ?? '',
-          reporterName: widget.reporterName ?? '',
-          postId: widget.postId ?? '',
-          commentId: widget.commentId ?? '',
-          commentText: widget.commentText ?? '',
-          reason: _selectedReason!,
-          detail: _detailController.text.trim(),
+        await _backendService.reportUserAndComment(
+          widget.reportedUID,
+          "$_selectedReason: ${_detailController.text.trim()}",
         );
       }
 
