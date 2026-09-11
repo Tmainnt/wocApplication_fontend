@@ -31,5 +31,5 @@ class WidgetColor {
   Color followButton() => Color.fromARGB(255, 97, 126, 255);
   Color boxShadowColor() => const Color.fromARGB(255, 158, 158, 158);
 
-
+  Color deleteWidget() => Colors.red;
 }
