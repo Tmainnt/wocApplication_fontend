@@ -16,7 +16,6 @@ class User {
   // new field
   double _weight;
   double _height;
-  int _age;
   int _total_step;
   double _total_calories;
   double _total_distance;
@@ -39,7 +38,6 @@ class User {
     required DateTime uts,
     required double weight,
     required double height,
-    required int age,
     required int total_step,
     required double total_calories,
     required double total_distance,
@@ -60,7 +58,6 @@ class User {
        _updateTimestamp = uts,
        _weight = weight,
        _height = height,
-       _age = age,
        _total_step = total_step,
        _total_calories = total_calories,
        _total_distance = total_distance,
@@ -84,7 +81,6 @@ class User {
       uts: DateTime.parse(json["update_timestamp"]),
       weight: json["user_weight"],
       height: json["user_height"],
-      age: json["user_age"],
       total_step: json["total_step"],
       total_calories: json["total_calories"],
       total_distance: json["total_distance"],
@@ -108,11 +104,26 @@ class User {
   DateTime get updateTimestamp => _updateTimestamp;
   double get height => _weight;
   double get weight => _height;
-  int get age => _age;
   String get BMI => (_weight / (_height) * (_height)).toStringAsFixed(2);
   int get totalStep => _total_step;
   double get totalCalories => _total_calories;
   double get totalDistance => _total_distance;
   int get totalTime => _total_time;
   int get lessongComplete => _total_lesson_complete;
+
+  String age() {
+    final birthDate = DateTime.parse(_dob);
+    final today = DateTime.now();
+
+    int age = today.year - birthDate.year;
+
+    final hasHadBirthdayThisYear = today.month > birthDate.month ||
+        (today.month == birthDate.month && today.day >= birthDate.day);
+
+    if (!hasHadBirthdayThisYear) {
+      age--;
+    }
+
+    return age.toString();
+  }
 }
