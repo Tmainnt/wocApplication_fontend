@@ -37,6 +37,7 @@ class LoginController extends ChangeNotifier {
     return false;
   }
 
+  /*
   Future<bool> signInWithGoogleButtonAction() async {
     final idToken = await GoogleService().signInWithGoogle();
     if (idToken != null) {
@@ -50,6 +51,7 @@ class LoginController extends ChangeNotifier {
     }
     return false;
   }
+  */
 
   bool validInput() {
     validEmail = emailController.text.isNotEmpty;
