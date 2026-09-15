@@ -349,7 +349,7 @@ class ProfilePageState extends State<ProfilePage> {
               children: [
                 _buildBodyDetails('น้ำหนัก', userData.weight),
                 _buildBodyDetails('ส่วนสูง', userData.height),
-                _buildBodyDetails('อายุ', userData.age),
+                _buildBodyDetails('อายุ', userData.age()),
                 _buildBodyDetails('BMI', userData.BMI),
               ],
             ),
