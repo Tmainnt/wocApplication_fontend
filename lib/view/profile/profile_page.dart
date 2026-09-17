@@ -16,7 +16,7 @@ enum ImageType { profile, background }
 class ProfilePage extends StatefulWidget {
   final String? UID;
   final String? currentUserRole;
-  const ProfilePage({ super.key, this.UID, this.currentUserRole });
+  const ProfilePage({super.key, this.UID, this.currentUserRole});
   @override
   State<ProfilePage> createState() => ProfilePageState();
 }
@@ -25,7 +25,6 @@ class ProfilePageState extends State<ProfilePage> {
   final widgetColors = WidgetColor();
   final fontColor = TextColor();
   final BackendService _backendService = BackendService();
-  late Future<dynamic> _userDataFuture;
   late Future<List<Post>> _userPostsFuture;
 
   @override
@@ -37,11 +36,9 @@ class ProfilePageState extends State<ProfilePage> {
   Future<void> _handleRefresh() async {
     final user = Provider.of<UserProvider>(context, listen: false).queryUser;
     final uid = widget.UID ?? user?.uid.toString();
-    
+
     if (uid != null) {
       setState(() {
-        _userDataFuture = _backendService.getUserDataByUID(uid);
-        // Assuming there's a method for user posts
         _userPostsFuture = _backendService.getUserPosts(uid);
       });
     }
@@ -49,11 +46,14 @@ class ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    User? currentUser = Provider.of<UserProvider>(context, listen: true).queryUser;
+    User? currentUser = Provider.of<UserProvider>(
+      context,
+      listen: true,
+    ).queryUser;
 
     return Scaffold(
       body: FutureBuilder<dynamic>(
-        future: _userDataFuture,
+        future: Future.value(currentUser),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -116,7 +116,7 @@ class ProfilePageState extends State<ProfilePage> {
                             GestureDetector(
                               onTap: () {
                                 _showFullImage(
-                                  userData['user_background_image'] ?? '',
+                                  userData.backgroundImage,
                                   ImageType.background,
                                 );
                               },
@@ -124,15 +124,13 @@ class ProfilePageState extends State<ProfilePage> {
                                 child: SizedBox(
                                   width: double.infinity,
                                   height: 150,
-                                  child:
-                                      (userData['user_background_image'] != null &&
-                                          userData['user_background_image'] != '')
+                                  child: userData.backgroundImage.isNotEmpty
                                       ? Image.network(
-                                          userData['user_background_image'],
+                                          userData.backgroundImage,
                                           fit: BoxFit.cover,
                                         )
                                       : Image.asset(
-                                          'assets/default_background.png',
+                                          'assets/image/default_background.png',
                                           fit: BoxFit.cover,
                                         ),
                                 ),
@@ -245,13 +243,13 @@ class ProfilePageState extends State<ProfilePage> {
                                     const SizedBox(height: 10),
                                     Expanded(
                                       child: Text(
-                                        userData['user_name'] ?? '',
+                                        userData.name,
                                         style: const TextStyle(fontSize: 15),
                                       ),
                                     ),
                                     Expanded(
                                       child: Text(
-                                        userData['user_bio'] ?? '',
+                                        userData.email,
                                         style: TextStyle(
                                           color: fontColor.textDark(),
                                           fontSize: 12,
@@ -270,7 +268,7 @@ class ProfilePageState extends State<ProfilePage> {
                           child: GestureDetector(
                             onTap: () {
                               _showFullImage(
-                                userData['user_profile_image'] ?? '',
+                                userData.profileImage,
                                 ImageType.profile,
                               );
                             },
@@ -285,11 +283,11 @@ class ProfilePageState extends State<ProfilePage> {
                                   197,
                                   197,
                                 ),
-                                backgroundImage: (userData['user_profile_image'] != null &&
-                                        userData['user_profile_image'] != '')
-                                    ? NetworkImage(userData['user_profile_image'])
+                                backgroundImage:
+                                    userData.profileImage.isNotEmpty
+                                    ? NetworkImage(userData.profileImage)
                                     : const AssetImage(
-                                            'assets/default_profile.png',
+                                            'assets/image/default_profile.png',
                                           )
                                           as ImageProvider,
                               ),
@@ -494,9 +492,7 @@ class ProfilePageState extends State<ProfilePage> {
           itemBuilder: (context, index) {
             return Column(
               children: [
-                CreatePostCard(
-                  post: posts[index],
-                ),
+                CreatePostCard(post: posts[index]),
                 const SizedBox(height: 10),
               ],
             );
@@ -543,8 +539,8 @@ class ProfilePageState extends State<ProfilePage> {
                       ? Image.network(imageUrl)
                       : Image.asset(
                           type == ImageType.profile
-                              ? 'assets/default_profile.png'
-                              : 'assets/default_background.png',
+                              ? 'assets/image/default_profile.png'
+                              : 'assets/image/default_background.png',
                           fit: BoxFit.cover,
                         ),
                 ),
