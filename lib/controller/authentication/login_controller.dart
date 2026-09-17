@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:woc/provider/user_provider.dart';
 import 'package:woc/service/auth_service.dart';
-import 'package:woc/service/google_service.dart';
+//import 'package:woc/service/google_service.dart';
 
 class LoginController extends ChangeNotifier {
 
@@ -29,6 +29,7 @@ class LoginController extends ChangeNotifier {
         _userProvider.setUser(userData);
         return true;
       } catch (e) {
+        print("LOGIN ERROR: $e");
         return false;
       }
     }
