@@ -82,7 +82,7 @@ class _MainWrapperState extends State<MainWrapper> {
                     GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
-                        Provider.of<UserProvider>(context).clearUser();
+                        Provider.of<UserProvider>(context, listen: false).clearUser();
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => LoginForm()),
