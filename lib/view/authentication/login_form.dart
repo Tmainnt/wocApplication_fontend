@@ -3,11 +3,12 @@ import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:woc/constant/app_enum.dart";
 import "package:woc/controller/authentication/login_controller.dart";
+import "package:woc/main_wrapper.dart";
 import "package:woc/provider/user_provider.dart";
 import "package:woc/theme/text_color.dart";
 import "package:woc/theme/widget_color.dart";
 import "package:woc/view/authentication/register_form.dart";
-import "package:woc/view/home_page.dart";
+//import "package:woc/view/home_page.dart";
 import "package:woc/widget/auth/custom_textfield.dart";
 
 class LoginForm extends StatefulWidget {
@@ -120,7 +121,7 @@ class LogFormState extends State<LoginForm> {
                     SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: () async {
-                        await (loginController.loginButtonAction()) ? Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()),) : ScaffoldMessenger.of(context,).showSnackBar(SnackBar(content: Text("อีเมลหรือรหัสผ่านไม่ถูกต้อง")));
+                        await (loginController.loginButtonAction()) ? Navigator.push(context, MaterialPageRoute(builder: (context) => MainWrapper()),) : ScaffoldMessenger.of(context,).showSnackBar(SnackBar(content: Text("อีเมลหรือรหัสผ่านไม่ถูกต้อง")));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: widgetColor.elevatedButtonAuth(),
