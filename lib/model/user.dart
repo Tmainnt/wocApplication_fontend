@@ -17,7 +17,7 @@ class User {
   double _weight;
   double _height;
   int _total_step;
-  double _total_calories;
+  int _total_calories;
   double _total_distance;
   int _total_time;
   int _total_lesson_complete;
@@ -39,7 +39,7 @@ class User {
     required double weight,
     required double height,
     required int total_step,
-    required double total_calories,
+    required int total_calories,
     required double total_distance,
     required int total_time,
     required int total_lesson_complete,
@@ -106,7 +106,7 @@ class User {
   double get weight => _height;
   String get BMI => (_weight / (_height) * (_height)).toStringAsFixed(2);
   int get totalStep => _total_step;
-  double get totalCalories => _total_calories;
+  int get totalCalories => _total_calories;
   double get totalDistance => _total_distance;
   int get totalTime => _total_time;
   int get lessongComplete => _total_lesson_complete;
