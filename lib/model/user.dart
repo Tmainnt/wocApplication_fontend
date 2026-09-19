@@ -79,11 +79,11 @@ class User {
       status: json["user_status"],
       cts: DateTime.parse(json["create_timestamp"]),
       uts: DateTime.parse(json["update_timestamp"]),
-      weight: json["user_weight"],
-      height: json["user_height"],
+      weight: (json["user_weight"] as num?)?.toDouble() ?? 0.0,
+      height: (json["user_height"] as num?)?.toDouble() ?? 0.0,
       total_step: json["total_step"],
       total_calories: json["total_calories"],
-      total_distance: json["total_distance"],
+      total_distance: (json["total_distance"] as num?)?.toDouble() ?? 0.0,
       total_time: json["total_time"],
       total_lesson_complete: json["total_lesson_complete"],
     );
@@ -102,9 +102,9 @@ class User {
   String get status => _status;
   DateTime get createTimestamp => _createTimestamp;
   DateTime get updateTimestamp => _updateTimestamp;
-  double get height => _weight;
-  double get weight => _height;
-  String get BMI => (_weight / (_height) * (_height)).toStringAsFixed(2);
+  double get height => _height;
+  double get weight => _weight;
+  String get BMI => (_weight / ((_height) * (_height))).toStringAsFixed(2);
   int get totalStep => _total_step;
   int get totalCalories => _total_calories;
   double get totalDistance => _total_distance;
@@ -112,7 +112,29 @@ class User {
   int get lessongComplete => _total_lesson_complete;
 
   String age() {
-    final birthDate = DateTime.parse(_dob);
+    DateTime? birthDate = DateTime.tryParse(_dob);
+
+    // The API can return dates as either ISO-8601 or dd/MM/yyyy.
+    if (birthDate == null) {
+      final match = RegExp(r'^(\d{1,2})/(\d{1,2})/(\d{4})$').firstMatch(_dob);
+      if (match != null) {
+        final day = int.parse(match.group(1)!);
+        final month = int.parse(match.group(2)!);
+        final year = int.parse(match.group(3)!);
+        final parsedDate = DateTime(year, month, day);
+
+        if (parsedDate.year == year &&
+            parsedDate.month == month &&
+            parsedDate.day == day) {
+          birthDate = parsedDate;
+        }
+      }
+    }
+
+    if (birthDate == null) {
+      return '-';
+    }
+
     final today = DateTime.now();
 
     int age = today.year - birthDate.year;
