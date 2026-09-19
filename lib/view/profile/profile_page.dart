@@ -297,36 +297,14 @@ class ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                   ),
+                  
+                  _buildStats(userData),
                 ],
               ),
             ),
           );
         },
       ),
-    );
-  }
-
-  Widget _buildDetails(String label, int value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: fontColor.profilePageSubTitleDarkColor(),
-            fontWeight: FontWeight.w500,
-            fontSize: 12,
-          ),
-        ),
-        const SizedBox(width: 5),
-        Text(
-          value.toString(),
-          style: TextStyle(
-            color: fontColor.profilePageSubTitleLightColor(),
-            fontSize: 12,
-          ),
-        ),
-      ],
     );
   }
 
