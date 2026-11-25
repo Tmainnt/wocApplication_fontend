@@ -26,7 +26,7 @@ class ProfilePageState extends State<ProfilePage> {
   final fontColor = TextColor();
   final BackendService _backendService = BackendService();
   late Future<List<Post>> _userPostsFuture;
-  Future User? currentUser;
+  Future<User?>? currentUser;
 
   @override
   void initState() {
