@@ -26,6 +26,7 @@ class ProfilePageState extends State<ProfilePage> {
   final fontColor = TextColor();
   final BackendService _backendService = BackendService();
   late Future<List<Post>> _userPostsFuture;
+  Future User? currentUser;
 
   @override
   void initState() {
@@ -34,7 +35,7 @@ class ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _handleRefresh() async {
-    final user = Provider.of<UserProvider>(context, listen: false).queryUser;
+    currentUser = Provider.of<UserProvider>(context, listen: false).queryUser;
     final uid = widget.UID ?? user?.uid.toString();
 
     if (uid != null) {
@@ -46,11 +47,6 @@ class ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    User? currentUser = Provider.of<UserProvider>(
-      context,
-      listen: true,
-    ).queryUser;
-
     return Scaffold(
       body: FutureBuilder<dynamic>(
         future: Future.value(currentUser),
